@@ -61,20 +61,30 @@ bool AVLTree::removeNode(AVLNode*& current){
 bool AVLTree::remove(AVLNode *&current, KeyType key) {
     return false;
 }
-
-void AVLTree::balanceNode(AVLNode *&node) {
-    size_t balance;
+int AVLTree::getBalance(AVLNode *&node) {
+    int balance;
     if (node->left != nullptr && node->right != nullptr) {
         balance = node->left->height - node->right->height;
-    } else if (node->left != nullptr) {
-        size_t balance = (-1) - node->right->height;
+    } else if (node->left == nullptr) {
+        balance = (-1) - node->right->height;
     } else {
-        size_t balance = node->left->height - (-1);
+        balance = node->left->height - (-1);
     }
-    if (balance < 2 || balance > -2) {
-        return;
-    } else {
+    return balance;
+}
 
+void AVLTree::balanceNode(AVLNode *&node) {
+
+    if (getBalance(node) < 2 && getBalance(node) > -2) {
+        return;
+    } else if (getBalance(node) == -2){
+        if (getBalance(node->right) == 1) {
+
+        }
+    } else if (getBalance(node) == 2) {
+        if (getBalance(node->left) == -1) {
+
+        }
     }
 }
 
@@ -83,7 +93,12 @@ bool AVLTree::insert(const std::string& key, size_t value) {
 }
 
 bool AVLTree::remove(const std::string& key) {
+    AVLNode* nodeToRemove = nodeFinder(root, key);
+    if (!nodeToRemove) {
+        return false;
+    } else {
 
+    }
 }
 
 bool AVLTree::contains(const std::string& key) const {

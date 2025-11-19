@@ -64,6 +64,7 @@ public:
     bool removeNode(AVLNode*& current);
     // You will implement this, but it is needed for removeNode()
     void balanceNode(AVLNode*& node);
+    int getBalance (AVLNode *&node);
 
 };
 
