@@ -29,6 +29,7 @@ public:
     ~AVLTree();
     friend std::ostream& operator<<(ostream& os, const AVLTree & avlTree);
 
+
 protected:
     class AVLNode {
     public:
@@ -45,8 +46,7 @@ protected:
         bool isLeaf() const;
         // number of hops to deepest leaf node
         size_t getHeight() const;
-        AVLNode* nodeFinder(AVLNode current, const std::string& key) const;
-
+        AVLNode(const std::string& key, size_t value) : key(key), value(value), height(0), left(nullptr), right(nullptr) {}
     };
 
 public:
@@ -56,7 +56,7 @@ public:
 
     private:
     AVLNode* root;
-
+    AVLNode* nodeFinder(AVLNode* current, const std::string& key) const;
     /* Helper methods for remove */
     // this overloaded remove will do the recursion to remove the node
     bool remove(AVLNode*& current, KeyType key);

@@ -63,7 +63,21 @@ bool AVLTree::remove(AVLNode *&current, KeyType key) {
 }
 
 void AVLTree::balanceNode(AVLNode *&node) {
+    size_t balance;
+    if (node->left != nullptr && node->right != nullptr) {
+        balance = node->left->height - node->right->height;
+    } else if (node->left != nullptr) {
+        size_t balance = (-1) - node->right->height;
+    } else {
+        size_t balance = node->left->height - (-1);
+    }
+    if (balance < 2 || balance > -2) {
+        return;
+    } else {
+
+    }
 }
+
 bool AVLTree::insert(const std::string& key, size_t value) {
 
 }
@@ -73,15 +87,19 @@ bool AVLTree::remove(const std::string& key) {
 }
 
 bool AVLTree::contains(const std::string& key) const {
-
+    if (nodeFinder(root, key) == nullptr) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 std::optional<size_t> AVLTree::get(const std::string& key) const {
-
+    return nodeFinder(root, key)->value;
 }
 
 size_t& AVLTree::operator[](const std::string& key) {
-
+    return nodeFinder(root, key)->value;
 }
 
 vector<std::string> AVLTree::findRange( const std::string& lowKey, const std::string& highKey) const {
@@ -114,7 +132,14 @@ AVLTree::~AVLTree() {
 std::ostream& operator<<(ostream& os, const AVLTree & avlTree) {
 
 }
-AVLTree::AVLNode *AVLTree::AVLNode::nodeFinder(AVLNode current, const std::string &key) const {
 
+AVLTree::AVLNode* AVLTree::nodeFinder(AVLNode* current, const std::string &key) const {
+    if (!current) return nullptr;
+    if (current->key == key) {
+        return current;
+    } else if (key < current->key) {
+        return nodeFinder(current->left, key);
+    } else {
+        return nodeFinder(current->right, key);
+    }
 }
-
