@@ -56,7 +56,7 @@ public:
 
     private:
     AVLNode* root;
-    AVLNode* nodeFinder(AVLNode* current, const std::string& key) const;
+    AVLNode* nodeFinder(AVLNode* current, const std::string& key, bool cases) const;
     /* Helper methods for remove */
     // this overloaded remove will do the recursion to remove the node
     bool remove(AVLNode*& current, KeyType key);
@@ -65,6 +65,12 @@ public:
     // You will implement this, but it is needed for removeNode()
     void balanceNode(AVLNode*& node);
     int getBalance (AVLNode *&node);
+    int avlSize;
+    void updateHeight(AVLNode *&current);
+    AVLNode* nodeSpaceFinder(AVLNode* current, const std::string &key) const;
+    void balanceTree(AVLNode*& parentNode, AVLNode* root);
+    AVLNode* findSuccessor(AVLNode* parentNode);
+    bool removeSuccessor(const std::string& key);
 
 };
 
