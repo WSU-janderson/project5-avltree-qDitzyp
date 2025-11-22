@@ -19,11 +19,17 @@ public:
     bool contains(const std::string& key) const;
     std::optional<size_t> get(const std::string& key) const;
     size_t& operator[](const std::string& key);
-    vector<std::string> findRange( const std::string& lowKey,
-    const std::string& highKey) const;
+
+
+
+    std::vector<size_t> findRange( const std::string& lowKey,
+                                   const std::string& highKey) const;
+
+
+
     std::vector<std::string> keys() const;
     size_t size() const;
-    size_t getHeight() const;
+    int getHeight() const;
     AVLTree(const AVLTree& other);
     void operator=(const AVLTree& other);
     ~AVLTree();
@@ -45,7 +51,7 @@ protected:
         // true or false
         bool isLeaf() const;
         // number of hops to deepest leaf node
-        size_t getHeight() const;
+        int getHeight() const;
         AVLNode(const std::string& key, size_t value) : key(key), value(value), height(0), left(nullptr), right(nullptr) {}
     };
 
@@ -55,6 +61,9 @@ public:
 
 
     private:
+    void findRange(::AVLTree::AVLNode *current, std::vector<size_t> &valueList, const std::string &lowKey,
+                   const std::string &highKey) const;
+    void keys(::AVLTree::AVLNode *current, std::vector<std::string> &keys) const;
     AVLNode* root;
     AVLNode* nodeFinder(AVLNode* current, const std::string& key, bool cases) const;
     /* Helper methods for remove */
@@ -64,11 +73,19 @@ public:
     bool removeNode(AVLNode*& current);
     // You will implement this, but it is needed for removeNode()
     void balanceNode(AVLNode*& node);
+
+    void rotateLeft(AVLNode *&node);
+
+    void rotateRight(AVLNode *&node);
+
     int getBalance (AVLNode *&node);
     int avlSize;
     void updateHeight(AVLNode *&current);
     AVLNode* nodeSpaceFinder(AVLNode* current, const std::string &key) const;
     void balanceTree(AVLNode*& parentNode, AVLNode* root);
+
+    bool insert(AVLNode *&current, const std::string &key, size_t value);
+
     AVLNode* findSuccessor(AVLNode* parentNode);
     bool removeSuccessor(const std::string& key);
 

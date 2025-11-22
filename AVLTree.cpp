@@ -3,15 +3,15 @@
 #include <string>
 
 size_t AVLTree::AVLNode::numChildren() const {
-    return 0;
+    return !!left + !!right;
 }
 
 bool AVLTree::AVLNode::isLeaf() const {
-    return false;
+    return !left && !right;
 }
 
-size_t AVLTree::AVLNode::getHeight() const {
-    return 0;
+int AVLTree::AVLNode::getHeight() const {
+    return height;
 }
 
 bool AVLTree::removeNode(AVLNode*& current){
@@ -59,8 +59,30 @@ bool AVLTree::removeNode(AVLNode*& current){
 }
 
 bool AVLTree::remove(AVLNode *&current, KeyType key) {
-    return false;
+    if (!current) return false;
+    bool removed = false;
+    if (key < current->key) {
+        removed = remove(current->left, key);
+    } else if (key > current->key){
+        removed = remove(current->right, key);
+    } else {
+        removed = removeNode(current);
+        if (removed) {
+            avlSize--;
+        }
+    }
+    if (!removed) {
+        return false;
+    }
+    updateHeight(current);
+    balanceNode(current);
+    return true;
 }
+
+bool AVLTree::remove(const std::string& key) {
+    return remove(root, key);
+}
+
 int AVLTree::getBalance(AVLNode *&node) {
     int balance;
     if (node->left != nullptr && node->right != nullptr) {
@@ -74,68 +96,61 @@ int AVLTree::getBalance(AVLNode *&node) {
 }
 
 void AVLTree::balanceNode(AVLNode *&node) {
-
     if (getBalance(node) < 2 && getBalance(node) > -2) {
         return;
     } else if (getBalance(node) == -2){
         if (getBalance(node->right) == 1) {
-
+            rotateRight(node->right);
         }
+        rotateLeft(node);
     } else if (getBalance(node) == 2) {
         if (getBalance(node->left) == -1) {
-
+            rotateLeft(node->left);
         }
+        rotateRight(node);
     }
 }
-void AVLTree::balanceTree(AVLNode*& parentNode, AVLNode* root) {
-   if (parentNode->key == root->key) {
-
-   }
+void AVLTree::rotateLeft(AVLNode* &node) {
+    AVLNode* hook = node->right;
+    node->right = hook->left;
+    hook->left = node;
+    node = hook;
+    updateHeight(node->left);
+    updateHeight(node);
 }
-bool AVLTree::insert(const std::string& key, size_t value) {
-    if (contains(key) == true) return false;
-    AVLNode* parentNode = nodeSpaceFinder(root, key);
-    if (key < parentNode->key) {
-        parentNode->left = new AVLNode(key, value);
-    }else if (key > parentNode->key) {
-        parentNode->right = new AVLNode(key, value);
-    }
-    this->avlSize++;
 
+void AVLTree::rotateRight(AVLNode* &node) {
+    AVLNode* hook = node->left;
+    node->left = hook->right;
+    hook->right = node;
+    node = hook;
+    updateHeight(node->right);
+    updateHeight(node);
+}
+
+bool AVLTree::insert(AVLNode*& current, const std::string& key, size_t value) {
+    if (!current) {
+        current = new AVLNode(key, value);
+        avlSize++;
+        return true;
+    }
+    bool inserted = false;
+    if (key < current->key) {
+        inserted = insert(current->left, key, value);
+    } else if (key > current->key){
+        inserted = insert(current->right, key, value);
+    }
+    if (!inserted) {
+        return false;
+    }
+    updateHeight(current);
+    balanceNode(current);
     return true;
 }
 
-bool AVLTree::remove(const std::string& key) {
-    if (contains(key) == false) return false;
-    AVLNode* nodeToRemove = nodeFinder(root, key, false);
-    AVLNode* successor = findSuccessor(nodeToRemove);
-    if (nodeToRemove->key == root->key) {
-        if (successor->key == nodeToRemove->left->key) {
-            string tempKey = nodeToRemove->left->key;
-            size_t tempValue = nodeToRemove->left->value;
-            delete nodeFinder(root, tempKey, false);
-            nodeToRemove->key = tempKey;
-            nodeToRemove->value = tempValue;
-            return true;
-        } else if (successor->key == nodeToRemove->right->key) {
-            string tempKey = nodeToRemove->right->key;
-            size_t tempValue = nodeToRemove->right->value;
-            delete nodeFinder(root, tempKey, false);
-            nodeToRemove->key = tempKey;
-            nodeToRemove->value = tempValue;
-            balanceTree(root, root);
-        }
-    } else {
-        AVLNode* successorParent = nodeFinder(root, nodeToRemove->key, true);
-        string tempkey = successor->key;
-        size_t tempValue = successor->value;
-        delete successor;
-        nodeToRemove->key = tempkey;
-        nodeToRemove->value = tempValue;
-        balanceTree(root, successorParent);
-        return true;
-    }
-
+bool AVLTree::insert(const std::string& key, size_t value) {
+    if (contains(key) == true) return false;
+    return insert(root, key, value);
 }
 
 bool AVLTree::contains(const std::string& key) const {
@@ -147,25 +162,51 @@ bool AVLTree::contains(const std::string& key) const {
 }
 
 std::optional<size_t> AVLTree::get(const std::string& key) const {
-    return nodeFinder(root, key, false)->value;
+    AVLNode* current = nodeFinder(root, key, false);
+    if (!current) return std::nullopt;
+    return std::make_optional(current->value);
 }
 
 size_t& AVLTree::operator[](const std::string& key) {
     return nodeFinder(root, key, false)->value;
 }
 
-vector<std::string> AVLTree::findRange( const std::string& lowKey, const std::string& highKey) const {
+void AVLTree::findRange(AVLNode* current, std::vector<size_t>& valueList, const std::string& lowKey, const std::string& highKey) const {
+    if (!current) return;
 
+    findRange(current->left, valueList, lowKey, highKey);
+    if (current->key >= lowKey && current->key <= highKey) {
+        valueList.push_back(current->value);
+    }
+    findRange(current->right, valueList, lowKey, highKey);
 }
-std::vector<std::string> AVLTree::keys() const {
 
+std::vector<size_t> AVLTree::findRange(const std::string& lowKey, const std::string& highKey) const {
+    std::vector<size_t> valueList;
+    findRange(root, valueList, lowKey, highKey);
+    return valueList;
+}
+
+//in alphabetical order (left, current, right)
+void AVLTree::keys(AVLNode* current, std::vector<std::string>& keyList) const {
+    if (!current) return;
+    keys(current->left, keyList);
+    keyList.push_back(current->key);
+    keys(current->right, keyList);
+}
+
+std::vector<std::string> AVLTree::keys() const {
+    std::vector<std::string> keyList;
+    keys(root, keyList);
+    return keyList;
 }
 
 size_t AVLTree::size() const {
     return this->avlSize;
 }
 
-size_t AVLTree::getHeight() const {
+int AVLTree::getHeight() const {
+    if (!root) return -1;
     return root->height;
 }
 
@@ -173,6 +214,9 @@ AVLTree::AVLTree(const AVLTree& other) {
 
 }
 
+void AVLTree destroyTree(AVLNode* current) {
+    
+}
 void AVLTree::operator=(const AVLTree& other) {
 
 }
@@ -204,6 +248,7 @@ AVLTree::AVLNode* AVLTree::nodeFinder(AVLNode* current, const std::string &key, 
         return nodeFinder(current->right, key, false);
     }
 }
+
 void AVLTree::updateHeight(AVLNode *&current) {
     int leftheight = -1;
     int rightheight = -1;
@@ -214,33 +259,4 @@ void AVLTree::updateHeight(AVLNode *&current) {
         rightheight = current->right->height;
     }
     current->height = max(leftheight, rightheight) + 1;
-}
-
-AVLTree::AVLNode* AVLTree::nodeSpaceFinder(AVLNode* current, const std::string &key) const {
-    if (current == nullptr) return current;
-    if (key < current->key) {
-        if (current->left == nullptr) {
-            return current;
-        } else {
-            return nodeSpaceFinder(current->left, key);
-        }
-    } else if (key > current->key) {
-        if (current->right == nullptr) {
-            return current;
-        } else {
-            return nodeSpaceFinder(current->right, key);
-        }
-    }
-}
-AVLTree::AVLNode* AVLTree::findSuccessor(AVLNode* parentNode) {
-    AVLNode* successor;
-    if (parentNode->right == nullptr) return parentNode->left;
-    successor = parentNode->right;
-    while (true) {
-        if (successor->left == nullptr) {
-            return successor;
-        } else {
-            successor = successor->left;
-        }
-    }
 }
