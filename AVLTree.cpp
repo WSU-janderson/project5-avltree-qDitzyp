@@ -1,5 +1,5 @@
 #include "AVLTree.h"
-
+#include <iostream>
 #include <string>
 
 size_t AVLTree::AVLNode::numChildren() const {
@@ -214,17 +214,30 @@ AVLTree::AVLTree(const AVLTree& other) {
 
 }
 
-void AVLTree destroyTree(AVLNode* current) {
-    
+void AVLTree::destroyTree(AVLNode* current) {
+    if (!current) return;
+    destroyTree(current->left);
+    destroyTree(current->right);
+    delete current;
 }
 void AVLTree::operator=(const AVLTree& other) {
 
 }
 
 AVLTree::~AVLTree() {
-
+    destroyTree(root);
 }
 
+void AVLTree::printTree(AVLNode* current, int level) {
+    if (!current) return;
+    printTree(current->right, level + 1);
+    for (int i = 0; i < level; i++) {
+        std::cout << "  ";
+    }
+    std::cout << "{" << current->key << ": " << current->value << "}\n";
+    printTree(current->left, level + 1);
+}
+//I don't quite understand how to return the printout as an osStream, but the printTree above is what I thought of before I realized I had to return and osStream
 std::ostream& operator<<(ostream& os, const AVLTree & avlTree) {
 
 }

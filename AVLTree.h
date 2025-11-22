@@ -31,8 +31,14 @@ public:
     size_t size() const;
     int getHeight() const;
     AVLTree(const AVLTree& other);
+
+
+
     void operator=(const AVLTree& other);
     ~AVLTree();
+
+
+
     friend std::ostream& operator<<(ostream& os, const AVLTree & avlTree);
 
 
@@ -61,6 +67,7 @@ public:
 
 
     private:
+    void printTree(::AVLTree::AVLNode *current, int level);
     void findRange(::AVLTree::AVLNode *current, std::vector<size_t> &valueList, const std::string &lowKey,
                    const std::string &highKey) const;
     void keys(::AVLTree::AVLNode *current, std::vector<std::string> &keys) const;
@@ -85,7 +92,7 @@ public:
     void balanceTree(AVLNode*& parentNode, AVLNode* root);
 
     bool insert(AVLNode *&current, const std::string &key, size_t value);
-
+    void destroyTree(::AVLTree::AVLNode *current);
     AVLNode* findSuccessor(AVLNode* parentNode);
     bool removeSuccessor(const std::string& key);
 
